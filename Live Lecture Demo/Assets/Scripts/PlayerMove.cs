@@ -1,20 +1,39 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMove : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5.0f; // meters per sec
-    private Vector3 moveDirection = Vector3.right; // same as Vector3(1.0f, 0.0f, 0.0f);
+    //private Vector3 moveDirection = new Vector3(0.0f, 0.0f, 0.0f);
+    private Vector3 moveDirection = new Vector3(0.0f, 0.0f, 0.0f);
 
+    private PlayerActions actions;
+    private InputAction movementAction;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-
+        actions = new PlayerActions();
+        movementAction = actions.gameWorld.movement;
     }
+
+    void OnEnable()
+    {
+        movementAction.Enable();
+    }
+
+
+    void OnDisable()
+    {
+        movementAction.Disable();
+    }
+
 
     // Update is called once per frame
     void Update()
     {
+        moveDirection.x = movementAction.ReadValue<Vector2>().x;
+        moveDirection.z = movementAction.ReadValue<Vector2>().y;
+
         //every frame move player by the speed and direction values.
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.Self);
     }
@@ -23,7 +42,7 @@ public class PlayerMove : MonoBehaviour
     void OnTriggerEnter(Collider collider)
     {
         // change move direction to a different vector.
-        moveDirection = Vector3.forward;
-        Debug.Log("trigger event detected. New direction = " + moveDirection);
+        //moveDirection = Vector3.forward;
+        //Debug.Log("trigger event detected. New direction = " + moveDirection);
     }
 }
