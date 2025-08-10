@@ -4,11 +4,11 @@ using UnityEngine.InputSystem;
 public class PlayerMove : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5.0f; // meters per sec
-    //private Vector3 moveDirection = new Vector3(0.0f, 0.0f, 0.0f);
-    private Vector3 moveDirection = new Vector3(0.0f, 0.0f, 0.0f);
 
+    private Vector3 moveDirection = new Vector3(0.0f, 0.0f, 0.0f);
     private PlayerActions actions;
     private InputAction movementAction;
+
 
     void Awake()
     {
@@ -21,12 +21,10 @@ public class PlayerMove : MonoBehaviour
         movementAction.Enable();
     }
 
-
     void OnDisable()
     {
         movementAction.Disable();
     }
-
 
     // Update is called once per frame
     void Update()
@@ -36,13 +34,5 @@ public class PlayerMove : MonoBehaviour
 
         //every frame move player by the speed and direction values.
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.Self);
-    }
-
-
-    void OnTriggerEnter(Collider collider)
-    {
-        // change move direction to a different vector.
-        //moveDirection = Vector3.forward;
-        //Debug.Log("trigger event detected. New direction = " + moveDirection);
     }
 }
