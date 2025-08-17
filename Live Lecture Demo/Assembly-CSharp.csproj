@@ -51,7 +51,9 @@
     <Compile Include="Assets\Scripts\PlayerMove.cs" />
     <Compile Include="Assets\Input\PlayerActions.cs" />
     <Compile Include="Assets\Scripts\MonsterMovement.cs" />
+    <Compile Include="Assets\Scripts\MonsterBehaviour.cs" />
     <Compile Include="Assets\Scripts\CoordCubeMovement.cs" />
+    <Compile Include="Assets\Scripts\Fireball.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

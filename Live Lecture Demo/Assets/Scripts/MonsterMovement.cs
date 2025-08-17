@@ -16,6 +16,7 @@ public class MonsterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         // transform the right vector from local to world space
         Vector3 myRight = transform.TransformDirection(Vector3.right);
         //Debug.Log("my right: " + myRight);
@@ -40,25 +41,24 @@ public class MonsterMovement : MonoBehaviour
         //Debug.Log("target relative: " + targetRelative);
 
         // Update transform.Rotate to be modified by the Dot Product result.
-        float rotationDirection = 0.0f;
+        // float rotationDirection = 0.0f;
 
-        if (targetRelative < 0)
-        {
-            Debug.Log("target to left of me.");
+        // if (targetRelative < 0)
+        // {
+        //     Debug.Log("target to left of me.");
 
-            rotationDirection = -1.0f;
-        }
-        else if (targetRelative > 0)
-        {
-            Debug.Log("target to right of me.");
+        //     rotationDirection = -1.0f;
+        // }
+        // else if (targetRelative > 0)
+        // {
+        //     Debug.Log("target to right of me.");
 
-            rotationDirection = 1.0f;
-        }
+        //     rotationDirection = 1.0f;
+        // }
 
-        //transform.Rotate(Vector3.up, rotateRate * Time.deltaTime, Space.Self);
         //transform.Rotate(Vector3.up, rotationDirection * rotateRate * Time.deltaTime, Space.Self);
+        //Debug.Log("rotationDirection = " + rotationDirection + "\n targetRelative = " + targetRelative);
         transform.Rotate(Vector3.up, targetRelative * rotateRate * Time.deltaTime, Space.Self);
-        Debug.Log("rotationDirection = " + rotationDirection + "\n targetRelative = " + targetRelative);
-
     }
+
 }
