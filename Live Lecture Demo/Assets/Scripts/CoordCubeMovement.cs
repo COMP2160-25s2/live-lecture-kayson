@@ -23,6 +23,6 @@ public class CoordCubeMovement : MonoBehaviour
     {
         // change move direction to a different vector.
         moveDirection = Vector3.forward;
-        Debug.Log("trigger event detected from collision with: " + collider.gameObject.name + ". New direction = " + moveDirection);
+        //Debug.Log("trigger event detected from collision with: " + collider.gameObject.name + ". New direction = " + moveDirection);
     }
 }

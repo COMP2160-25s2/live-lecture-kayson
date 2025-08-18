@@ -9,13 +9,13 @@ public class Fireball : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime, Space.Self);
-        Debug.Log("fireball: moving");
+        // Debug.Log("fireball: moving");
     }
 
     // destroy if fireball hits object
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Fireball hit object: " + other.gameObject.name);
+        // Debug.Log("Fireball hit object: " + other.gameObject.name);
         Destroy(gameObject);
     }
 

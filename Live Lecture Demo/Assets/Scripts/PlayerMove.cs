@@ -9,6 +9,10 @@ public class PlayerMove : MonoBehaviour
     private PlayerActions actions;
     private InputAction movementAction;
 
+    public delegate void VisionEventHandler(bool isVisible);
+    public event VisionEventHandler VisionEvent;
+
+
 
     void Awake()
     {
@@ -26,6 +30,8 @@ public class PlayerMove : MonoBehaviour
         movementAction.Disable();
     }
 
+
+
     // Update is called once per frame
     void Update()
     {
@@ -35,4 +41,18 @@ public class PlayerMove : MonoBehaviour
         //every frame move player by the speed and direction values.
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.Self);
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        //Debug.Log("Player trigger detected" + other.gameObject.name);
+        // invoke player in in vision event
+        VisionEvent?.Invoke(true);
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        VisionEvent?.Invoke(false);
+    }
+
+
 }
