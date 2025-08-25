@@ -15,8 +15,11 @@ public class Fireball : MonoBehaviour
     // destroy if fireball hits object
     void OnTriggerEnter(Collider other)
     {
-        // Debug.Log("Fireball hit object: " + other.gameObject.name);
-        Destroy(gameObject);
+        if (other.gameObject.layer == Dictionary.PlayerLayer)
+        {
+            Debug.Log("Fireball hit object: " + other.gameObject.name);
+            Destroy(gameObject);
+        }
     }
 
 

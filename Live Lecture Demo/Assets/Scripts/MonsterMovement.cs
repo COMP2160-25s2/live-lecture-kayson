@@ -5,6 +5,22 @@ public class MonsterMovement : MonoBehaviour
     [SerializeField] private float rotateRate = 1.0f; // m/s
     [SerializeField] private Transform target;
 
+
+    private float rotationModifier = 1.0f; // clockwise
+    public float RotationModifier
+    {
+        get
+        {
+            return rotationModifier;
+        }
+        set
+        {
+            rotationModifier = value;
+        }
+
+    }
+
+
     void Start()
     {
         if (!target)
@@ -16,7 +32,12 @@ public class MonsterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        DoRotation();
+        DoDotRotation();
+    }
+
+    private void DoDotRotation()
+    {
         // transform the right vector from local to world space
         Vector3 myRight = transform.TransformDirection(Vector3.right);
         //Debug.Log("my right: " + myRight);
@@ -40,6 +61,7 @@ public class MonsterMovement : MonoBehaviour
         float targetRelative = Vector3.Dot(myRight, toTargetNorm);
         //Debug.Log("target relative: " + targetRelative);
 
+
         // Update transform.Rotate to be modified by the Dot Product result.
         // float rotationDirection = 0.0f;
 
@@ -60,5 +82,14 @@ public class MonsterMovement : MonoBehaviour
         //Debug.Log("rotationDirection = " + rotationDirection + "\n targetRelative = " + targetRelative);
         transform.Rotate(Vector3.up, targetRelative * rotateRate * Time.deltaTime, Space.Self);
     }
+
+    private void DoRotation()
+    {
+        //TODO: Move to movement
+        transform.Rotate(Vector3.up, rotationModifier * rotateRate * Time.deltaTime, Space.Self);
+    }
+    
+
+
 
 }

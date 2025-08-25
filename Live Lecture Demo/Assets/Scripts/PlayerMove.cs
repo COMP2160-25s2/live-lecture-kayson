@@ -13,6 +13,7 @@ public class PlayerMove : MonoBehaviour
     public event VisionEventHandler VisionEvent;
 
 
+    [SerializeField] private MonsterBehaviour monster;
 
     void Awake()
     {
@@ -30,7 +31,10 @@ public class PlayerMove : MonoBehaviour
         movementAction.Disable();
     }
 
+    void Start()
+    {
 
+    }
 
     // Update is called once per frame
     void Update()
@@ -53,6 +57,18 @@ public class PlayerMove : MonoBehaviour
     {
         VisionEvent?.Invoke(false);
     }
-
-
 }
+
+
+#region Hoarding
+//private string password = "def not password";
+// if (monster.Password == password)
+// {
+//     Debug.Log("yay");
+// }
+// else
+// {
+//     Debug.Log("very sad. Let's do crime");
+//     monster.Password = password;
+// }
+#endregion
