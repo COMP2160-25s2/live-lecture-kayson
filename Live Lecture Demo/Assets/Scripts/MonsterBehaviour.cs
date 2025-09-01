@@ -4,21 +4,18 @@ using UnityEngine.iOS;
 
 public class MonsterBehaviour : MonoBehaviour
 {
-    
     [SerializeField] private Transform target;
 
     [SerializeField] private LayerMask layers;
-
-    [SerializeField] private Fireball fireball;
 
     [SerializeField] private float attackInterval = 5.0f; // /seconds
 
     [SerializeField] private float timeUntilSleep = 10.0f; // how long until i sleep in seconds
     [SerializeField] private float timeUntilSearching = 2.0f; // how long until i search for in seconds
 
-    
 
-    private int targetLayer;
+    private PlayerMove player;
+    private MonsterAttack monsterAttack;
 
     [SerializeField] private float viewDistance = 5.0f; // meters
 
@@ -26,7 +23,7 @@ public class MonsterBehaviour : MonoBehaviour
 
     private bool canSeePlayer = false;
 
-    private float timer;
+    private float stateTimer;
 
 
     private enum State
@@ -54,7 +51,6 @@ public class MonsterBehaviour : MonoBehaviour
 
     #region  Move them
 
-    //TODO: Move to movement
     [SerializeField] private float rotateRate = 1.0f; // m/s
 
     #endregion  Move them
@@ -64,24 +60,27 @@ public class MonsterBehaviour : MonoBehaviour
     void Awake()
     {
         monsterState = defaultState;
-        timer = timeUntilSleep;
+        stateTimer = timeUntilSleep;
+        
+        monsterAttack = GetComponent<MonsterAttack>();
+        if (!monsterAttack)
+        {
+            Debug.LogError("Missing Monster Attack Component");
+        }
+
     }
 
     void Start()
     {
-        if (!fireball)
+        if (stateTimer == timeUntilSleep)
         {
-            //Debug.LogError("No fireball assigned!!!");
+            Debug.Assert(stateTimer == timeUntilSleep, "The timer has progressed in timer since Awake()");
         }
 
-        if (timer == timeUntilSleep)
-        {
-            Debug.Assert(timer == timeUntilSleep, "The timer has progressed in timer since Awake()");
-        }
 
-        PlayerMove player = target.gameObject.GetComponent<PlayerMove>();
-        player.VisionEvent += OnVisionEvent;
-        targetLayer = Dictionary.PlayerLayer;
+        player = target.gameObject.GetComponent<PlayerMove>();
+        player.VisionEvent += OnVisionEvent; // Cheating the collision event - don't do this - it's just how the live coding trigger issue was quickly solved
+
     }
 
     #endregion Init & Destryction
@@ -89,15 +88,8 @@ public class MonsterBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (timer == timeUntilSleep)
-        {
-            Debug.Assert(timer == timeUntilSleep, "The timer has progressed in timer since Awake()");
-        }
-
-        ///DoRotation();
+        DoRotation();
         DoBehaviour();
-
-        timer -= Time.deltaTime;
     }
 
     private void DoBehaviour()
@@ -105,10 +97,13 @@ public class MonsterBehaviour : MonoBehaviour
         switch (monsterState)
         {
             case State.Searching:
+                stateTimer -= Time.deltaTime;
+
                 DoSearching();
                 break;
 
             case State.Sleeping:
+                stateTimer -= Time.deltaTime;
                 DoSleeping();
                 break;
 
@@ -127,7 +122,7 @@ public class MonsterBehaviour : MonoBehaviour
 
     private void DoSleeping()
     {
-        if (timer <= 0)
+        if (stateTimer <= 0)
         {
             SetSearchingState();
         }
@@ -135,7 +130,6 @@ public class MonsterBehaviour : MonoBehaviour
 
     private void DoRotation()
     {
-        //TODO: Move to movement
         transform.Rotate(Vector3.up, rotationModifier * rotateRate * Time.deltaTime, Space.Self);
     }
 
@@ -149,7 +143,7 @@ public class MonsterBehaviour : MonoBehaviour
             SetAttackingState();
         }
 
-        if (timer <= 0)
+        if (stateTimer <= 0)
         {
             SetSleepingState();
         }
@@ -158,55 +152,27 @@ public class MonsterBehaviour : MonoBehaviour
     private void SetAttackingState()
     {
         monsterState = State.Attacking;
-        timer = attackInterval;
+        stateTimer = attackInterval;
     }
 
     private void SetSearchingState()
     {
         monsterState = State.Searching;
-        timer = timeUntilSleep;
+        stateTimer = timeUntilSleep;
     }
 
     private void SetSleepingState()
     {
         monsterState = State.Sleeping;
-        timer = timeUntilSearching;
+        stateTimer = timeUntilSearching;
     }
 
     private void DoAttacking()
     {
         Vector3 myRight = transform.TransformDirection(Vector3.right);
         Vector3 toTarget = Vector3.Normalize(target.position - transform.position);
+        monsterAttack.DoAttack(toTarget);
         rotationModifier = Vector3.Dot(myRight, toTarget);
-
-        if (timer <= 0)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, toTarget, out hit, viewDistance, layerMask: layers))
-            {
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
-
-                Debug.Log("hit.collider.gameObject.layer = " + hit.collider.gameObject.layer);
-                if (hit.collider.gameObject.layer == targetLayer)
-                {
-                    Shoot();
-                }
-            }
-            else
-            {
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 1000.0f, Color.magenta);
-            }
-
-            timer = attackInterval;
-        }
-    }
-
-    // ever 5 seconds, shoot a fireball
-    void Shoot()
-    {
-        //Debug.Log("Fireball is shooting");
-        Instantiate(fireball, this.transform.position, this.transform.rotation);
-        timer = attackInterval;
     }
 
     void OnTriggerEnter(Collider other)
@@ -225,34 +191,56 @@ public class MonsterBehaviour : MonoBehaviour
     {
         canSeePlayer = isVisible;
     }
+
+    #region HOARDING
+
+    private void DoDotRotation()
+    {
+        // transform the right vector from local to world space
+        Vector3 myRight = transform.TransformDirection(Vector3.right);
+        //Debug.Log("my right: " + myRight);
+
+        // Get the "toTarget" vector; the vector between my position and target position
+        Vector3 toTarget = target.position - transform.position;
+        //Debug.Log("toTarget.magnitude = " + toTarget.magnitude);
+
+        // Normalise the toTarget vector
+        //      - we don't care how far away we are, we just care about the direction, so get the direction with the vector normalised (i.e., a vector with mag of 1)
+        Vector3 toTargetNorm = Vector3.Normalize(toTarget);
+        //Debug.Log("toTargetNorm.magnitude = " + toTargetNorm.magnitude);
+
+
+        // Get the Dot product of the normalised toTarget vector and myRight vector
+        //       - if my right is at 90 degrees to the target, then I am facing the target straight on.
+        //  For normalized vectors in the same cood space, Dot returns a value between -1 and 1.
+        //      1 if they point in exactly the same direction,
+        //      -1 if they point in completely opposite directions, and
+        //      zero if the vectors are perpendicular.
+        float targetRelative = Vector3.Dot(myRight, toTargetNorm);
+        //Debug.Log("target relative: " + targetRelative);
+
+
+        // Update transform.Rotate to be modified by the Dot Product result.
+        // float rotationDirection = 0.0f;
+
+        // if (targetRelative < 0)
+        // {
+        //     Debug.Log("target to left of me.");
+
+        //     rotationDirection = -1.0f;
+        // }
+        // else if (targetRelative > 0)
+        // {
+        //     Debug.Log("target to right of me.");
+
+        //     rotationDirection = 1.0f;
+        // }
+
+        //transform.Rotate(Vector3.up, rotationDirection * rotateRate * Time.deltaTime, Space.Self);
+        //Debug.Log("rotationDirection = " + rotationDirection + "\n targetRelative = " + targetRelative);
+        transform.Rotate(Vector3.up, targetRelative * rotateRate * Time.deltaTime, Space.Self);
+    }
+
+    #endregion
+
 }
-
-#region Hoarding
-
-
-// private string defaultPassword = "123";
-
-// private string currentPassword = "666";
-
-
-// public string Password
-// {
-//     get
-//     {
-//         return currentPassword;
-//     }
-//     set
-//     {
-//         Debug.Log("Someone **tried** changed my password");
-//         bool meetsCriteria = false;
-//         if (meetsCriteria)
-//         {
-//             currentPassword = value;
-//         }
-
-
-//     }
-// }
-
-#endregion Hoarding
-

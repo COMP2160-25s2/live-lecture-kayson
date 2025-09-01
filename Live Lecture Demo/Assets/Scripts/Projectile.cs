@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Fireball : MonoBehaviour
+public class Projectile : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 20.0f;
 
@@ -9,15 +9,15 @@ public class Fireball : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime, Space.Self);
-        // Debug.Log("fireball: moving");
+        // Debug.Log("Projectile: moving");
     }
 
-    // destroy if fireball hits object
+    // destroy if Projectile hits object
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == Dictionary.PlayerLayer)
+        if (other.gameObject.layer == GameManager.PlayerLayer)
         {
-            Debug.Log("Fireball hit object: " + other.gameObject.name);
+            Debug.Log("Projectile hit object: " + other.gameObject.name);
             Destroy(gameObject);
         }
     }
